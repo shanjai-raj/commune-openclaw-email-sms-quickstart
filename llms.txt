@@ -1,13 +1,26 @@
 # openclaw-email-sms
 
-> Give your OpenClaw agents a real email address and phone number. Two installable skills — commune-email and commune-sms — add full email inbox management and SMS send/receive capabilities to any OpenClaw agent. Powered by Commune (commune.email), a production-grade email + SMS infrastructure for AI agents.
+> Give your OpenClaw agents a real email address and phone number. Three installable skills — commune-email, commune-sms, and commune-agent-network — add full email inbox management, SMS send/receive, and agent-to-agent task delegation to any OpenClaw agent. Powered by Commune (commune.email), a production-grade email + SMS infrastructure for AI agents.
 
 Install with one command: `bash install.sh`
 
 ## Skills
 
-- [commune-email](skills/commune-email/SKILL.md): Create inboxes, read threads, send and reply to emails, search by semantic query
+- [commune-email](skills/commune-email/SKILL.md): Create inboxes, read threads, send and reply to emails, search by semantic query. Agent identity via permanent email address.
 - [commune-sms](skills/commune-sms/SKILL.md): Send SMS, receive inbound messages, manage phone numbers
+- [commune-agent-network](skills/commune-agent-network/SKILL.md): Send tasks to other agents by email address, receive results in thread, search past tasks semantically. Agent-to-agent communication.
+
+## Agent Identity
+
+Each OpenClaw agent can have its own email address — a permanent identity on the internet. `commune.inboxes.create(local_part="my-agent")` returns `my-agent@org.commune.email`. This address persists across restarts, sessions, and framework versions.
+
+## Agent-to-Agent Communication
+
+Agents discover each other by email address. Tasks are delegated as emails. Results are replies in the same thread. The `thread_id` is the task's unique identifier and preserves the full chain. Key primitives:
+- `POST /v1/messages/send` with `to=agent.address` and `idempotencyKey` — send task safely
+- `thread_id` in reply body — binds result to task chain
+- `GET /v1/threads/:id/messages` — read full provenance
+- `GET /v1/search/threads?q=query` — find past similar tasks before starting duplicate work
 
 ## Setup
 
