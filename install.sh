@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# install.sh — Install Commune email & SMS skills for OpenClaw
+# install.sh — Install Commune email skills for OpenClaw
 # Usage: bash install.sh
 set -euo pipefail
 
@@ -54,23 +54,6 @@ fi
 chmod +x "${COMMUNE_EMAIL_DEST}/commune.js"
 info "commune-email skill installed"
 
-# ── Install commune-sms skill ─────────────────────────────────────────────────
-COMMUNE_SMS_DEST="${SKILLS_DIR}/commune-sms"
-
-if [ -d "${COMMUNE_SMS_DEST}" ]; then
-  warn "commune-sms skill already installed — updating..."
-  rm -rf "${COMMUNE_SMS_DEST}"
-fi
-
-cp -r "${SCRIPT_DIR}/skills/commune-sms" "${COMMUNE_SMS_DEST}"
-
-if [ -f "${COMMUNE_SMS_DEST}/package.json" ]; then
-  (cd "${COMMUNE_SMS_DEST}" && npm install --silent)
-fi
-
-chmod +x "${COMMUNE_SMS_DEST}/commune-sms.js"
-info "commune-sms skill installed"
-
 # ── Environment variable check ────────────────────────────────────────────────
 echo ""
 echo "Checking environment variables..."
@@ -82,7 +65,7 @@ missing_vars=()
 
 if [ ! -f "${ENV_FILE}" ]; then
   warn "No .env found at ${ENV_FILE}"
-  missing_vars+=("COMMUNE_API_KEY" "COMMUNE_PHONE_NUMBER_ID")
+  missing_vars+=("COMMUNE_API_KEY")
 else
   # Source the .env and check for required vars
   # shellcheck disable=SC1090
@@ -120,13 +103,6 @@ else
   exit 1
 fi
 
-if [ -f "${COMMUNE_SMS_DEST}/SKILL.md" ]; then
-  info "commune-sms SKILL.md present"
-else
-  error "commune-sms SKILL.md missing — installation may have failed"
-  exit 1
-fi
-
 # ── Done ──────────────────────────────────────────────────────────────────────
 echo ""
 echo -e "${GREEN}Installation complete!${NC}"
@@ -134,6 +110,6 @@ echo ""
 echo "Next steps:"
 echo "  1. Add COMMUNE_API_KEY to ${ENV_FILE}"
 echo "  2. Restart OpenClaw: openclaw restart (or close and reopen)"
-echo "  3. Try: 'Check my emails' or 'Send a text to +1 555 000 1234'"
+echo "  3. Try: 'Check my emails' or 'Reply to the email from Alex'"
 echo ""
-echo "Docs: https://github.com/shanjairaj7/email-for-agents/tree/main/openclaw-email-sms"
+echo "Docs: https://github.com/commune-dev/commune-openclaw-email-quickstart"

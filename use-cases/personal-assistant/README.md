@@ -1,6 +1,6 @@
-# Personal AI Assistant — Email & SMS with Commune
+# Personal AI Assistant — Email with Commune
 
-**Your OpenClaw agent, now with a real inbox and phone number. Ask it to check email while you're in a meeting. Have it text someone on your behalf. Get a morning briefing of unread threads — all from WhatsApp.**
+**Your OpenClaw agent, now with a real inbox. Ask it to check email while you're in a meeting. Get a morning briefing of unread threads — all from WhatsApp.**
 
 ---
 
@@ -11,14 +11,12 @@ flowchart LR
     You["You\nWhatsApp / Telegram\n/ iMessage"] -->|"'Check my email'"| OC["OpenClaw\n(Mac Mini / VPS)"]
     OC --> LLM["Your LLM\n(Claude / GPT /\nOllama local)"]
     LLM --> OC
-    OC <-->|"commune-email\n+ commune-sms skills"| Commune["Commune\nEmail + SMS"]
+    OC <-->|"commune-email skill"| Commune["Commune\nEmail"]
     Commune <-->|"real email"| Inbox["Your Inbox\nassistant@...\n.commune.email"]
-    Commune <-->|"real SMS"| Phone["Your Number\n+1 415..."]
     Inbox -->|"incoming email"| OC
-    Phone -->|"incoming SMS"| OC
 ```
 
-Your OpenClaw agent bridges your chat app and the real world. When you message it on WhatsApp, it reads your email, composes replies, and sends texts — as you.
+Your OpenClaw agent bridges your chat app and the real world. When you message it on WhatsApp, it reads your email and composes replies — as you.
 
 ---
 
@@ -79,24 +77,13 @@ Your OpenClaw agent bridges your chat app and the real world. When you message i
 | "Tag this as urgent" | `POST /v1/threads/:id/tags` |
 | "Which threads have I not replied to in over a week?" | Lists inbound threads, filters by date |
 
-### SMS
-
-| What you say | What happens |
-|-------------|-------------|
-| "Text +14155551234 that I'm running 10 minutes late" | `POST /v1/sms/send` |
-| "Send the client a text that their order shipped" | Sends SMS from your Commune number |
-| "What did John text me?" | Reads SMS conversation with John's number |
-| "Show me my recent texts" | Lists all SMS conversations |
-| "Has anyone texted me today?" | Lists conversations, checks timestamps |
-| "Text Mom happy birthday" | Sends if you've set Mom's number in USER.md |
-
 ### Automation
 
 | What you say | What happens |
 |-------------|-------------|
 | "Every morning summarize my inbox" | Sets up recurring task (see Morning Briefing below) |
 | "Let me know on WhatsApp if I get an email from my bank" | Event-driven monitoring |
-| "Check my email every hour and text me if anything urgent arrives" | Polling + conditional SMS |
+| "Check my email every hour and notify me on WhatsApp if anything urgent arrives" | Polling + conditional notification |
 
 ---
 
@@ -109,9 +96,8 @@ Sign up at [commune.email](https://commune.email) and copy your API key from the
 ### 2. Install the Skills
 
 ```bash
-git clone https://github.com/commune-email/email-for-agents
-cp -r email-for-agents/openclaw-email-sms/skills/commune-email ~/.openclaw/workspace/skills/
-cp -r email-for-agents/openclaw-email-sms/skills/commune-sms ~/.openclaw/workspace/skills/
+git clone https://github.com/commune-dev/commune-openclaw-email-quickstart
+cp -r commune-openclaw-email-quickstart/skills/commune-email ~/.openclaw/workspace/skills/
 ```
 
 ### 3. Set Environment Variables
@@ -122,8 +108,6 @@ Add to your shell profile (`~/.zshrc`, `~/.bashrc`) or your OpenClaw env config:
 export COMMUNE_API_KEY=comm_your_key_here
 export COMMUNE_INBOX_ID=             # set after step 4
 export COMMUNE_INBOX_ADDRESS=        # set after step 4
-export COMMUNE_PHONE_ID=             # set after step 5 (optional)
-export COMMUNE_PHONE_NUMBER=         # set after step 5 (optional)
 ```
 
 ### 4. Create Your Personal Inbox
@@ -147,18 +131,7 @@ export COMMUNE_INBOX_ID=inbox_xxx
 export COMMUNE_INBOX_ADDRESS=personal@yourdomain.commune.email
 ```
 
-### 5. Get a Phone Number (Optional)
-
-Provision a phone number at [commune.email/dashboard](https://commune.email/dashboard), then:
-
-```bash
-node ~/.openclaw/workspace/skills/commune-sms/commune-sms.js list-numbers
-# → +14155551234 — ID: pn_xxx
-export COMMUNE_PHONE_ID=pn_xxx
-export COMMUNE_PHONE_NUMBER=+14155551234
-```
-
-### 6. Tell Your Agent About Yourself
+### 5. Tell Your Agent About Yourself
 
 Add to `~/.openclaw/workspace/USER.md` (your agent reads this to understand you):
 
@@ -175,16 +148,6 @@ When checking email:
 
 Reply style: casual but professional. Use my first name to sign off.
 
-## SMS
-
-My Commune phone number: +14155551234
-Phone number ID: pn_xxx
-
-Common contacts:
-- Mom: +15105550001
-- Sarah (work): +14085550002
-- Contractor (Mike): +16505550003
-
 ## Preferences
 
 If anything looks urgent, notify me immediately — don't wait for me to ask.
@@ -195,15 +158,14 @@ Check email when I ask, don't poll unless I set up a schedule.
 
 ## Teach Your Agent Its Role
 
-Add to your agent's `SOUL.md` to make email and SMS part of its core identity:
+Add to your agent's `SOUL.md` to make email part of its core identity:
 
 ```markdown
 ## Communication
 
-I have access to [Your Name]'s real email inbox and SMS line via Commune.
+I have access to [Your Name]'s real email inbox via Commune.
 
 My email address: personal@yourdomain.commune.email (inbox_id: inbox_xxx)
-My SMS number: +14155551234 (phone_number_id: pn_xxx)
 
 When asked to check email, I:
 1. List threads with last_direction: inbound (waiting for reply)
@@ -214,10 +176,6 @@ When replying to email, I always:
 - Include thread_id to keep conversations threaded
 - Write in [Your Name]'s voice — see USER.md for style notes
 - Confirm before sending if unsure of tone or content
-
-When sending SMS, I:
-- Normalize numbers to E.164 format
-- Keep messages concise and natural
 ```
 
 ---
@@ -266,9 +224,6 @@ Add your inbox address and ID to `USER.md`. The agent reads this on every sessio
 
 **"Agent sent a reply as a new thread instead of a reply"**
 The `thread_id` was missing from the send call. Make sure the agent reads the thread first and passes `thread_id` in the reply body.
-
-**"SMS send failed"**
-Check that the number is in E.164 format (`+14155551234`) and that `COMMUNE_PHONE_ID` is set correctly.
 
 **"Search isn't finding my emails"**
 Vector search needs a moment after new emails arrive. Also try rephrasing — natural language queries work better than keywords alone.

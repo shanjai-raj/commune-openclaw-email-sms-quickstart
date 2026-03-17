@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for your interest in contributing to openclaw-email-sms!
+Thanks for your interest in contributing to commune-openclaw-email-quickstart!
 
 ## Ways to contribute
 

@@ -1,6 +1,6 @@
-# Company AI Agent — Customer Email & SMS with Commune
+# Company AI Agent — Customer Email with Commune
 
-**Deploy OpenClaw as your company's AI agent. It handles customer support email, sends SMS updates, and keeps your team informed — all running on your own infrastructure.**
+**Deploy OpenClaw as your company's AI agent. It handles customer support email and keeps your team informed — all running on your own infrastructure.**
 
 ---
 
@@ -10,27 +10,23 @@
 flowchart TD
     subgraph External["External (Customers)"]
         CE["Customer Email\nsupport@company.com"]
-        CS["Customer SMS\n+1 800 number"]
     end
     subgraph Commune["Commune Platform"]
         CI["Support Inbox\n+ Spam Filter\n+ Injection Detection"]
-        CP["Phone Number\n+ SMS Routing"]
     end
     subgraph OpenClaw["OpenClaw Agent (your server)"]
         OC["Agent Core\n+ Memory\n+ Skills"]
         LLM["Claude / GPT\n(your keys)"]
-        COM["commune-email\n+ commune-sms\nskills"]
+        COM["commune-email\nskill"]
     end
     subgraph Team["Your Team"]
         SLACK["Slack / Discord\n(via OpenClaw)"]
         OC_TEAM["OpenClaw\n(team channel)"]
     end
     CE --> CI --> OC
-    CS --> CP --> OC
     OC <--> LLM
     OC --> COM
     COM --> CI
-    COM --> CP
     OC --> SLACK
     OC --> OC_TEAM
 ```
@@ -68,8 +64,7 @@ The agent monitors the inbox and acts as a triage layer — alerting humans and 
 Every 15 minutes:
   → Agent checks inbox for new threads
   → Urgent (contains: "down", "can't access", "production", "breach"):
-      → SMS to on-call engineer immediately
-      → Post full email in #incidents Slack channel
+      → Post full email in #incidents Slack channel immediately
   → Normal:
       → Post summary in #support Slack channel
       → Assign to relevant team member if identifiable
@@ -90,8 +85,7 @@ The agent handles the complete support queue end-to-end. Humans only see escalat
 ```
 Continuous operation:
   → New email arrives → classify → respond → close
-  → New SMS arrives → acknowledge → answer or escalate
-  → Any thread unanswered > 4 hours → SMS on-call, flag in Slack
+  → Any thread unanswered > 4 hours → flag in Slack
   → Any thread re-opened after close → escalate immediately
   → Tone mismatch (angry customer) → route to senior support + notify manager
 
@@ -110,12 +104,11 @@ Place this in your company agent's `SOUL.md` at `~/.openclaw/workspace/souls/sup
 ```markdown
 # Company Support Agent
 
-I am the AI support agent for Acme Corp. I handle customer emails and SMS.
+I am the AI support agent for Acme Corp. I handle customer emails.
 
 ## My contact info
 
 Email inbox: support@acme.commune.email (inbox_id: inbox_xxx)
-Phone number: +18005551234 (phone_number_id: pn_xxx)
 
 ## My responsibilities
 
@@ -128,7 +121,7 @@ Phone number: +18005551234 (phone_number_id: pn_xxx)
 
 ## Escalation triggers
 
-Escalate via SMS to on-call (+14155559000) if:
+Escalate to on-call Slack channel if:
 - Subject or body contains: "breach", "hacked", "data leak", "down", "production outage"
 - Customer has been waiting > 4 hours with no reply
 - Customer explicitly asks to speak to a human
@@ -180,7 +173,6 @@ Configure in each agent's `AGENTS.md`:
 ## My Commune config
 Inbox: support@yourco.commune.email
 Inbox ID: inbox_aaa
-Phone: +18005551234 (phone_number_id: pn_xxx)
 
 ## Routing rules
 If email mentions billing/invoice/payment → forward to billing@yourco.commune.email
@@ -204,7 +196,6 @@ Your team can talk to the support agent from Slack or WhatsApp:
 | "Close all threads tagged 'resolved'" | Batch status update to `closed` |
 | "Who's been waiting the longest?" | Sort inbound threads by `last_message_at` ascending |
 | "Draft a reply to the angry customer in thread_yyy and show it to me first" | Drafts in Slack, waits for approval |
-| "Send an SMS to +1415... that their issue is fixed" | `POST /v1/sms/send` |
 | "Give me today's support summary" | Thread count, categories, average wait time |
 | "Search for all threads about the login bug" | Semantic search across inbox |
 
@@ -224,14 +215,12 @@ These protections matter especially in company deployments where attackers may s
 
 ## Setup Checklist
 
-- [ ] `commune-email` and `commune-sms` skills installed in `~/.openclaw/workspace/skills/`
+- [ ] `commune-email` skill installed in `~/.openclaw/workspace/skills/`
 - [ ] `COMMUNE_API_KEY` set in server environment
 - [ ] Commune inbox created for each agent (`support@`, `billing@`, etc.)
 - [ ] `COMMUNE_INBOX_ID` set per-agent (in each agent's env or config)
-- [ ] Commune phone number provisioned (if using SMS)
-- [ ] `COMMUNE_PHONE_ID` set in environment
 - [ ] Agent `SOUL.md` updated with inbox details and responsibilities
-- [ ] Escalation contacts set (on-call SMS number, Slack channel)
+- [ ] Escalation contacts set (Slack channel)
 - [ ] Tested with a real email to the support inbox
 
 For detailed setup steps, see [../../setup/README.md](../../setup/README.md).

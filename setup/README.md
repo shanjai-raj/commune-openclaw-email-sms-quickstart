@@ -1,6 +1,6 @@
 # Setup Guide — Commune + OpenClaw Integration
 
-Step-by-step instructions for connecting your OpenClaw agent to Commune email and SMS.
+Step-by-step instructions for connecting your OpenClaw agent to Commune email.
 
 ---
 
@@ -16,25 +16,22 @@ Step-by-step instructions for connecting your OpenClaw agent to Commune email an
 ## Step 2: Install the Skills
 
 ```bash
-# Clone the email-for-agents repo
-git clone https://github.com/commune-email/email-for-agents
-cd email-for-agents/openclaw-email-sms
+# Clone the repo
+git clone https://github.com/commune-dev/commune-openclaw-email-quickstart
+cd commune-openclaw-email-quickstart
 
 # Copy skills into your OpenClaw workspace
 cp -r skills/commune-email ~/.openclaw/workspace/skills/
-cp -r skills/commune-sms ~/.openclaw/workspace/skills/
 
 # Make the helper scripts executable
 chmod +x ~/.openclaw/workspace/skills/commune-email/commune.js
-chmod +x ~/.openclaw/workspace/skills/commune-sms/commune-sms.js
 ```
 
-Verify the skills appeared:
+Verify the skill appeared:
 
 ```bash
 openclaw skill list | grep commune
 # commune-email
-# commune-sms
 ```
 
 ---
@@ -50,10 +47,6 @@ export COMMUNE_API_KEY=comm_your_key_here
 # Set after Step 4 (inbox creation)
 export COMMUNE_INBOX_ID=inbox_xxx
 export COMMUNE_INBOX_ADDRESS=assistant@yourdomain.commune.email
-
-# Set after Step 5 (phone number, optional)
-export COMMUNE_PHONE_ID=pn_xxx
-export COMMUNE_PHONE_NUMBER=+14155551234
 ```
 
 After editing your shell profile, reload it:
@@ -96,29 +89,7 @@ Copy the values and add them to your environment (Step 3).
 
 ---
 
-## Step 5: Get a Phone Number (Optional)
-
-If you want SMS capability:
-
-1. Go to [commune.email/dashboard](https://commune.email/dashboard) → Phone Numbers → Provision
-2. Choose a number (US, UK, or other regions available)
-3. List your numbers to get the ID:
-
-```bash
-node ~/.openclaw/workspace/skills/commune-sms/commune-sms.js list-numbers
-# +14155551234 — ID: pn_xxx
-```
-
-Add to your environment:
-
-```bash
-export COMMUNE_PHONE_ID=pn_xxx
-export COMMUNE_PHONE_NUMBER=+14155551234
-```
-
----
-
-## Step 6: Verify the Integration
+## Step 5: Verify the Integration
 
 Test that everything is connected:
 
@@ -128,9 +99,6 @@ node ~/.openclaw/workspace/skills/commune-email/commune.js create-inbox test
 
 # Test list threads (should return empty or your threads)
 node ~/.openclaw/workspace/skills/commune-email/commune.js list-threads $COMMUNE_INBOX_ID
-
-# Test SMS list (if you have a phone number)
-node ~/.openclaw/workspace/skills/commune-sms/commune-sms.js list-numbers
 ```
 
 Send a test email to your new inbox from any email client, wait 30 seconds, then:
@@ -144,7 +112,7 @@ If you see your test email listed, the integration is working.
 
 ---
 
-## Step 7: Tell Your Agent
+## Step 6: Tell Your Agent
 
 Add your inbox details to `~/.openclaw/workspace/USER.md` so the agent knows about them:
 
@@ -159,20 +127,13 @@ When checking email:
 - Prioritize threads with last_direction: inbound (waiting for reply)
 - Skip newsletter/automated notifications unless I ask
 - Reply in my voice — casual but professional
-
-### SMS
-My Commune phone number: +14155551234
-Phone number ID: pn_xxx
-
-Common contacts:
-- [Name]: +1XXXXXXXXXX
 ```
 
 For a company agent, update the agent's `SOUL.md` with its inbox and responsibilities. See [../use-cases/company-assistant/README.md](../use-cases/company-assistant/README.md) for a full template.
 
 ---
 
-## Step 8: Test With Your Agent
+## Step 7: Test With Your Agent
 
 Restart OpenClaw to pick up the new skills and environment variables, then test:
 
@@ -182,9 +143,6 @@ Agent: [lists your threads]
 
 You: Send a test email to yourself@gmail.com with subject "Hello from my agent"
 Agent: [sends via Commune]
-
-You: Text +14155551234 "this is a test"  (use your own number to self-test)
-Agent: [sends SMS]
 ```
 
 ---
@@ -236,19 +194,6 @@ Your API key is invalid or expired.
 
 ---
 
-### "SMS send failed"
-
-1. Check number format — must be E.164: `+14155551234`
-   - The CLI helper auto-normalizes US 10-digit numbers
-   - For non-US numbers, include the country code
-2. Verify `COMMUNE_PHONE_ID` is set and matches a provisioned number:
-   ```bash
-   node ~/.openclaw/workspace/skills/commune-sms/commune-sms.js list-numbers
-   ```
-3. Check that your Commune account has SMS credits or an active plan
-
----
-
 ### "Replies are starting new threads instead of replying"
 
 The `thread_id` is not being passed in the send request. Make sure the agent:
@@ -274,8 +219,6 @@ In SKILL.md this is documented as critical — if the agent is skipping it, add 
 | `COMMUNE_API_KEY` | Yes | Your Commune API key | commune.email/dashboard → API Keys |
 | `COMMUNE_INBOX_ID` | Recommended | Default inbox ID | Response from `create-inbox` |
 | `COMMUNE_INBOX_ADDRESS` | Recommended | Full inbox address | Response from `create-inbox` |
-| `COMMUNE_PHONE_ID` | Optional | Default phone number ID | Response from `list-numbers` |
-| `COMMUNE_PHONE_NUMBER` | Optional | Full phone number in E.164 | Response from `list-numbers` |
 
 ---
 
@@ -284,4 +227,3 @@ In SKILL.md this is documented as critical — if the agent is skipping it, add 
 - [Personal assistant use case](../use-cases/personal-assistant/README.md) — prompts and setup for personal email management
 - [Company agent use case](../use-cases/company-assistant/README.md) — deployment patterns for customer-facing agents
 - [commune-email SKILL.md](../skills/commune-email/SKILL.md) — full email API reference for your agent
-- [commune-sms SKILL.md](../skills/commune-sms/SKILL.md) — full SMS API reference for your agent
