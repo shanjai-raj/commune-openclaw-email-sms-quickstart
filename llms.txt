@@ -1,13 +1,12 @@
-# openclaw-email-sms
+# commune-openclaw-email-quickstart
 
-> Give your OpenClaw agents a real email address and phone number. Three installable skills — commune-email, commune-sms, and commune-agent-network — add full email inbox management, SMS send/receive, and agent-to-agent task delegation to any OpenClaw agent. Powered by Commune (commune.email), a production-grade email + SMS infrastructure for AI agents.
+> Give your OpenClaw agents a real email address. Two installable skills — commune-email and commune-agent-network — add full email inbox management and agent-to-agent task delegation to any OpenClaw agent. Powered by Commune (commune.email), a production-grade email infrastructure for AI agents.
 
 Install with one command: `bash install.sh`
 
 ## Skills
 
 - [commune-email](skills/commune-email/SKILL.md): Create inboxes, read threads, send and reply to emails, search by semantic query. Agent identity via permanent email address.
-- [commune-sms](skills/commune-sms/SKILL.md): Send SMS, receive inbound messages, manage phone numbers
 - [commune-agent-network](skills/commune-agent-network/SKILL.md): Send tasks to other agents by email address, receive results in thread, search past tasks semantically. Agent-to-agent communication.
 
 ## Agent Identity
@@ -30,7 +29,7 @@ Agents discover each other by email address. Tasks are delegated as emails. Resu
 ## API Reference
 
 - [Commune API docs](https://docs.commune.email): Full REST API reference
-- [Commune dashboard](https://commune.email/dashboard): Get your API key, manage inboxes and phone numbers
+- [Commune dashboard](https://commune.email/dashboard): Get your API key, manage inboxes
 
 ## Optional
 
